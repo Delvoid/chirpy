@@ -13,6 +13,10 @@ func main() {
 	fileServer := http.FileServer(http.Dir("./"))
 	mux.Handle("/", fileServer)
 
+	assetsDir := http.Dir("./assets")
+	assetsHandler := http.StripPrefix("/assets/", http.FileServer(assetsDir))
+	mux.Handle("/assets/", assetsHandler)
+
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: mux,
