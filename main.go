@@ -44,10 +44,10 @@ func main() {
 	appHandler := cfg.middlewareMetricsInc(http.StripPrefix("/app/", fileServer))
 	mux.Handle("/app/", appHandler)
 
-	mux.HandleFunc("/healthz", healthzHandlert)
+	mux.HandleFunc("GET /healthz", healthzHandlert)
 
-	mux.HandleFunc("/metrics", cfg.metricsHandler)
-	mux.HandleFunc("/reset", cfg.resetHandler)
+	mux.HandleFunc("GET /metrics", cfg.metricsHandler)
+	mux.HandleFunc("GET /reset", cfg.resetHandler)
 
 	server := &http.Server{
 		Addr:    ":" + port,
