@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
 )
 
@@ -10,8 +11,8 @@ type chirpRequest struct {
 }
 
 type chirpResponse struct {
-	Error string `json:"error,omitempty"`
-	Valid bool   `json:"valid,omitempty"`
+	Error       string `json:"error,omitempty"`
+	CleanedBody string `json:"cleaned_body,omitempty"`
 }
 
 func validateChirpHandler(w http.ResponseWriter, r *http.Request) {
@@ -28,13 +29,24 @@ func validateChirpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(chirpResponse{Valid: true})
+	cleanedBody := replaceProfaneWords(resBody.Body)
+	respondWithJSON(w, chirpResponse{CleanedBody: cleanedBody}, http.StatusOK)
 
 }
 
 func respondWithError(w http.ResponseWriter, errorMessage string, statusCode int) {
 	w.WriteHeader(statusCode)
 	json.NewEncoder(w).Encode(chirpResponse{Error: errorMessage})
+}
+
+func respondWithJSON(w http.ResponseWriter, payload interface{}, statusCode int) {
+	w.Header().Set("Content-Type", "application/json")
+	dat, err := json.Marshal(payload)
+	if err != nil {
+		log.Printf("Error marshalling JSON: %s", err)
+		w.WriteHeader(500)
+		return
+	}
+	w.WriteHeader(statusCode)
+	w.Write(dat)
 }
