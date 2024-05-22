@@ -1,6 +1,7 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
@@ -44,8 +45,19 @@ func healthzHandlert(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	debug := flag.Bool("debug", false, "Enable debug mode")
+	flag.Parse()
+
 	const port = "8080"
 	cfg := &apiConfig{}
+
+	if *debug {
+		log.Println("Debug mode enabled")
+		err := database.RemoveDatabase()
+		if err != nil {
+			log.Fatalf("Failed to remove database: %v", err)
+		}
+	}
 
 	err := database.Init()
 	if err != nil {

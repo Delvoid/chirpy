@@ -2,6 +2,7 @@ package database
 
 import (
 	"encoding/json"
+	"log"
 	"os"
 	"sync"
 )
@@ -20,6 +21,16 @@ func Init() error {
 		err = loadDatabase()
 	})
 	return err
+}
+
+func RemoveDatabase() error {
+	err := os.Remove(databaseFile)
+	if err != nil && !os.IsNotExist(err) {
+		log.Fatalf("Failed to remove database file: %v", err)
+		return err
+
+	}
+	return nil
 }
 
 func loadDatabase() error {
