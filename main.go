@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+
+	"github.com/Delvoid/chirpy/database"
 )
 
 type apiConfig struct {
@@ -43,8 +45,12 @@ func healthzHandlert(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	const port = "8080"
-
 	cfg := &apiConfig{}
+
+	err := database.Init()
+	if err != nil {
+		log.Fatalf("Failed to initialize database: %v", err)
+	}
 
 	mux := http.NewServeMux()
 
@@ -55,7 +61,10 @@ func main() {
 
 	mux.HandleFunc("GET /api/healthz", healthzHandlert)
 	mux.HandleFunc("GET /api/reset", cfg.resetHandler)
-	mux.HandleFunc("POST /api/validate_chirp", validateChirpHandler)
+
+	mux.HandleFunc("POST /api/chirps", createChirpHandler)
+	mux.HandleFunc("GET /api/chirps", getChirpsHandler)
+	mux.HandleFunc("GET /api/chirps/{chirpID}", getChirpByIDHandler)
 
 	server := &http.Server{
 		Addr:    ":" + port,
@@ -63,7 +72,7 @@ func main() {
 	}
 
 	log.Printf("Starting server on port: %s\n", port)
-	err := server.ListenAndServe()
+	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatalf("Server failed to start: %v", err)
 	}
