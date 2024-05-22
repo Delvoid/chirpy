@@ -29,8 +29,10 @@ func loadDatabase() error {
 	_, err := os.Stat(databaseFile)
 	if os.IsNotExist(err) {
 		db = &Database{
-			Chirps: make(map[int]Chirp),
-			NextID: 1,
+			Chirps:     make(map[int]Chirp),
+			Users:      make(map[int]User),
+			NextID:     1,
+			NextUserID: 1,
 		}
 		return nil
 	}
@@ -104,4 +106,24 @@ func saveDatabase() error {
 	}
 
 	return os.WriteFile(databaseFile, data, 0644)
+}
+
+func CreateUser(email string) (User, error) {
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+
+	user := User{
+		ID:    db.NextUserID,
+		Email: email,
+	}
+
+	db.Users[user.ID] = user
+	db.NextUserID++
+
+	err := saveDatabase()
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
 }

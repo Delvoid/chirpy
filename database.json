@@ -1,13 +1,15 @@
 {
-  "chirps": {
+  "chirps": {},
+  "users": {
     "1": {
       "id": 1,
-      "body": "I had something interesting for breakfast"
+      "email": "mloneusk@example.co"
     },
     "2": {
       "id": 2,
-      "body": "What about second breakfast?"
+      "email": "dackjorsey@example.co"
     }
   },
-  "next_id": 3
+  "next_id": 1,
+  "next_user_id": 3
 }
