@@ -8,7 +8,8 @@ import (
 )
 
 type userRequest struct {
-	Email string `json:"email"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
 
 func createUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -16,15 +17,23 @@ func createUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	if err := json.NewDecoder(r.Body).Decode(&resBody); err != nil {
 		respondWithError(w, "Invalid request body", http.StatusBadRequest)
+		defer r.Body.Close()
 		return
 	}
+	defer r.Body.Close()
 
-	chirp, err := database.CreateUser(resBody.Email)
+	user, err := database.CreateUser(resBody.Email, resBody.Password)
 	if err != nil {
 		respondWithError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	respondWithJSON(w, chirp, http.StatusCreated)
+	respondWithJSON(w, struct {
+		ID    int    `json:"id"`
+		Email string `json:"email"`
+	}{
+		ID:    user.ID,
+		Email: user.Email,
+	}, http.StatusCreated)
 
 }

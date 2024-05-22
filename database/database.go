@@ -6,6 +6,7 @@ import (
 	"os"
 	"sync"
 )
+import "golang.org/x/crypto/bcrypt"
 
 const databaseFile = "database.json"
 
@@ -119,22 +120,48 @@ func saveDatabase() error {
 	return os.WriteFile(databaseFile, data, 0644)
 }
 
-func CreateUser(email string) (User, error) {
+func CreateUser(email, password string) (User, error) {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()
 
+	// moved here as got a write lock error using the function - need to fix
+	for _, existingUser := range db.Users {
+		if existingUser.Email == email {
+			return User{}, ErrUserExists
+		}
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return User{}, err
+	}
+
 	user := User{
-		ID:    db.NextUserID,
-		Email: email,
+		ID:       db.NextUserID,
+		Email:    email,
+		Password: string(hashedPassword),
 	}
 
 	db.Users[user.ID] = user
 	db.NextUserID++
 
-	err := saveDatabase()
+	err = saveDatabase()
 	if err != nil {
 		return User{}, err
 	}
 
 	return user, nil
+}
+
+func GetUserByEmail(email string) (User, error) {
+	dbMutex.RLock()
+	defer dbMutex.RUnlock()
+
+	for _, user := range db.Users {
+		if user.Email == email {
+			return user, nil
+		}
+	}
+
+	return User{}, ErrUserNotFound
 }

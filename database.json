@@ -1,0 +1,12 @@
+{
+  "chirps": {},
+  "users": {
+    "1": {
+      "id": 1,
+      "email": "saul@bettercall.com",
+      "password": "$2a$10$QMjbQkfq5jCBbFB6YalkxeU1BR.M3nCJDG25vbFijYcZBuJeJYhIe"
+    }
+  },
+  "next_id": 1,
+  "next_user_id": 2
+}

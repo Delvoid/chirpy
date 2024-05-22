@@ -5,6 +5,8 @@ import "errors"
 var (
 	ErrChirpTooLong  = errors.New("chirp is too long")
 	ErrChirpNotFound = errors.New("chirp not found")
+	ErrUserNotFound  = errors.New("user not found")
+	ErrUserExists    = errors.New("user already exists")
 )
 
 type Chirp struct {
@@ -20,6 +22,7 @@ type Database struct {
 }
 
 type User struct {
-	ID    int    `json:"id"`
-	Email string `json:"email"`
+	ID       int    `json:"id"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }
