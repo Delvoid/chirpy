@@ -1,6 +1,7 @@
 package database
 
 import "errors"
+import "time"
 
 var (
 	ErrChirpTooLong  = errors.New("chirp is too long")
@@ -15,14 +16,21 @@ type Chirp struct {
 }
 
 type Database struct {
-	Chirps     map[int]Chirp `json:"chirps"`
-	Users      map[int]User  `json:"users"`
-	NextID     int           `json:"next_id"`
-	NextUserID int           `json:"next_user_id"`
+	Chirps        map[int]Chirp           `json:"chirps"`
+	Users         map[int]User            `json:"users"`
+	NextID        int                     `json:"next_id"`
+	NextUserID    int                     `json:"next_user_id"`
+	RefreshTokens map[string]RefreshToken `json:"refresh_tokens"`
 }
 
 type User struct {
 	ID       int    `json:"id"`
 	Email    string `json:"email"`
 	Password string `json:"password"`
+}
+
+type RefreshToken struct {
+	Token     string    `json:"token"`
+	UserID    int       `json:"user_id"`
+	ExpiresAt time.Time `json:"expires_at"`
 }

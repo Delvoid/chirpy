@@ -95,6 +95,8 @@ func main() {
 	mux.HandleFunc("POST /api/users", createUserHandler)
 	mux.HandleFunc("POST /api/login", loginHandler(cfg.jwtSecret))
 	mux.HandleFunc("PUT /api/users", updateUserHandler(cfg.jwtSecret))
+	mux.HandleFunc("POST /api/refresh", refreshHandler(cfg.jwtSecret))
+	mux.HandleFunc("POST /api/revoke", revokeHandler)
 
 	server := &http.Server{
 		Addr:    ":" + port,

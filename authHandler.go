@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
+	"time"
 
 	"github.com/Delvoid/chirpy/database"
 	"github.com/dgrijalva/jwt-go"
@@ -46,9 +48,6 @@ func loginHandler(jwtSecret string) http.HandlerFunc {
 			}
 		}
 
-		println("req expiresInSeconds: ", req.ExpiresInSeconds)
-		println("expiresInSeconds: ", expiresInSeconds)
-
 		claims := &jwt.StandardClaims{
 			Issuer:    "chirpy",
 			IssuedAt:  jwt.TimeFunc().Unix(),
@@ -63,15 +62,82 @@ func loginHandler(jwtSecret string) http.HandlerFunc {
 			return
 		}
 
+		refreshToken, err := database.CreateRefreshToken(user.ID, 60*24*60*60*time.Second) // Expire in 60 days
+		if err != nil {
+			respondWithError(w, "Failed to generate refresh token", http.StatusInternalServerError)
+			return
+		}
+
 		respondWithJSON(w, struct {
-			ID    int    `json:"id"`
-			Email string `json:"email"`
-			Token string `json:"token"`
+			ID           int    `json:"id"`
+			Email        string `json:"email"`
+			Token        string `json:"token"`
+			RefreshToken string `json:"refresh_token"`
 		}{
-			ID:    user.ID,
-			Email: user.Email,
-			Token: tokenString,
+			ID:           user.ID,
+			Email:        user.Email,
+			Token:        tokenString,
+			RefreshToken: refreshToken,
 		}, http.StatusOK)
 	}
 
+}
+
+func refreshHandler(jwtSecret string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tokenString := r.Header.Get("Authorization")
+		if tokenString == "" {
+			respondWithError(w, "Missing Authorization header", http.StatusUnauthorized)
+			return
+		}
+
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+		refreshToken, err := database.GetRefreshToken(tokenString)
+		if err != nil {
+			respondWithError(w, "Invalid refresh token", http.StatusUnauthorized)
+			return
+		}
+
+		if refreshToken.ExpiresAt.Before(time.Now()) {
+			respondWithError(w, "Refresh token has expired", http.StatusUnauthorized)
+			return
+		}
+
+		claims := &jwt.StandardClaims{
+			Issuer:    "chirpy",
+			IssuedAt:  jwt.TimeFunc().Unix(),
+			ExpiresAt: jwt.TimeFunc().Unix() + 3600, // Expire in 1 hour
+			Subject:   fmt.Sprintf("%d", refreshToken.UserID),
+		}
+
+		token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+		tokenString, err = token.SignedString([]byte(jwtSecret))
+		if err != nil {
+			respondWithError(w, "Failed to generate token", http.StatusInternalServerError)
+			return
+		}
+
+		respondWithJSON(w, struct {
+			Token string `json:"token"`
+		}{
+			Token: tokenString,
+		}, http.StatusOK)
+	}
+}
+
+func revokeHandler(w http.ResponseWriter, r *http.Request) {
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		respondWithError(w, "Missing Authorization header", http.StatusUnauthorized)
+		return
+	}
+
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+	err := database.DeleteRefreshToken(tokenString)
+	if err != nil {
+		respondWithError(w, "Invalid refresh token", http.StatusUnauthorized)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
 }

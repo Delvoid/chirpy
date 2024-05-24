@@ -3,10 +3,11 @@
   "users": {
     "1": {
       "id": 1,
-      "email": "mike@bettercall.com",
-      "password": "$2a$10$fT21PXuMW.mc8xs9ybX/Pe8PYcSnNuBR0pS4liB8EQ.95uXE.GptS"
+      "email": "chuck@bettercall.com",
+      "password": "$2a$10$fm4CtBkW9UDSB1svJyZ3huk7TRy.Vw6Lb7RRTZ.XL3DrNFzSDWU16"
     }
   },
   "next_id": 1,
-  "next_user_id": 2
+  "next_user_id": 2,
+  "refresh_tokens": {}
 }

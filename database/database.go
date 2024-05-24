@@ -1,10 +1,14 @@
 package database
 
 import (
+	"crypto/rand"
+	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"log"
 	"os"
 	"sync"
+	"time"
 )
 import "golang.org/x/crypto/bcrypt"
 
@@ -41,10 +45,11 @@ func loadDatabase() error {
 	_, err := os.Stat(databaseFile)
 	if os.IsNotExist(err) {
 		db = &Database{
-			Chirps:     make(map[int]Chirp),
-			Users:      make(map[int]User),
-			NextID:     1,
-			NextUserID: 1,
+			Chirps:        make(map[int]Chirp),
+			Users:         make(map[int]User),
+			NextID:        1,
+			NextUserID:    1,
+			RefreshTokens: make(map[string]RefreshToken),
 		}
 		return nil
 	}
@@ -195,4 +200,61 @@ func UpdateUser(id int, email, password string) (User, error) {
 	}
 
 	return user, nil
+}
+
+func CreateRefreshToken(userID int, expiresIn time.Duration) (string, error) {
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+
+	token := make([]byte, 32)
+	_, err := rand.Read(token)
+	if err != nil {
+		return "", err
+	}
+
+	refreshToken := RefreshToken{
+		Token:     hex.EncodeToString(token),
+		UserID:    userID,
+		ExpiresAt: time.Now().Add(expiresIn),
+	}
+
+	db.RefreshTokens[refreshToken.Token] = refreshToken
+
+	err = saveDatabase()
+	if err != nil {
+		return "", err
+	}
+
+	return refreshToken.Token, nil
+}
+
+func GetRefreshToken(token string) (RefreshToken, error) {
+	dbMutex.RLock()
+	defer dbMutex.RUnlock()
+
+	refreshToken, ok := db.RefreshTokens[token]
+	if !ok {
+		return RefreshToken{}, errors.New("refresh token not found")
+	}
+
+	return refreshToken, nil
+}
+
+func DeleteRefreshToken(token string) error {
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+
+	_, ok := db.RefreshTokens[token]
+	if !ok {
+		return errors.New("refresh token not found")
+	}
+
+	delete(db.RefreshTokens, token)
+
+	err := saveDatabase()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
