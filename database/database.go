@@ -165,3 +165,34 @@ func GetUserByEmail(email string) (User, error) {
 
 	return User{}, ErrUserNotFound
 }
+
+func UpdateUser(id int, email, password string) (User, error) {
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+
+	user, ok := db.Users[id]
+	if !ok {
+		return User{}, ErrUserNotFound
+	}
+
+	if email != "" {
+		user.Email = email
+	}
+
+	if password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return User{}, err
+		}
+		user.Password = string(hashedPassword)
+	}
+
+	db.Users[id] = user
+
+	err := saveDatabase()
+	if err != nil {
+		return User{}, err
+	}
+
+	return user, nil
+}

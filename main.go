@@ -5,12 +5,15 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Delvoid/chirpy/database"
+	"github.com/joho/godotenv"
 )
 
 type apiConfig struct {
 	fileserverHits int
+	jwtSecret      string
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -51,6 +54,17 @@ func main() {
 	const port = "8080"
 	cfg := &apiConfig{}
 
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Failed to load .env file: %v", err)
+	}
+
+	// Set the JWT secret
+	cfg.jwtSecret = os.Getenv("JWT_SECRET")
+	if cfg.jwtSecret == "" {
+		log.Fatalf("JWT_SECRET environment variable is not set")
+	}
+
 	if *debug {
 		log.Println("Debug mode enabled")
 		err := database.RemoveDatabase()
@@ -59,7 +73,7 @@ func main() {
 		}
 	}
 
-	err := database.Init()
+	err = database.Init()
 	if err != nil {
 		log.Fatalf("Failed to initialize database: %v", err)
 	}
@@ -79,7 +93,8 @@ func main() {
 	mux.HandleFunc("GET /api/chirps/{chirpID}", getChirpByIDHandler)
 
 	mux.HandleFunc("POST /api/users", createUserHandler)
-	mux.HandleFunc("POST /api/login", loginHandler)
+	mux.HandleFunc("POST /api/login", loginHandler(cfg.jwtSecret))
+	mux.HandleFunc("PUT /api/users", updateUserHandler(cfg.jwtSecret))
 
 	server := &http.Server{
 		Addr:    ":" + port,
