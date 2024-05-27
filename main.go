@@ -91,6 +91,7 @@ func main() {
 	mux.HandleFunc("POST /api/chirps", createChirpHandler(cfg.jwtSecret))
 	mux.HandleFunc("GET /api/chirps", getChirpsHandler)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", getChirpByIDHandler)
+	mux.HandleFunc("DELETE /api/chirps/{chirpID}", deleteChirpHandler(cfg.jwtSecret))
 
 	mux.HandleFunc("POST /api/users", createUserHandler)
 	mux.HandleFunc("POST /api/login", loginHandler(cfg.jwtSecret))

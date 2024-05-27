@@ -117,6 +117,25 @@ func CreateChirp(body string, userId int) (Chirp, error) {
 	return chirp, nil
 }
 
+func DeleteChirp(id int) error {
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+
+	_, ok := db.Chirps[id]
+	if !ok {
+		return ErrChirpNotFound
+	}
+
+	delete(db.Chirps, id)
+
+	err := saveDatabase()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func saveDatabase() error {
 	data, err := json.MarshalIndent(db, "", "  ")
 	if err != nil {

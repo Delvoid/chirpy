@@ -1,30 +1,29 @@
 {
-  "chirps": {
-    "1": {
-      "id": 1,
-      "body": "I'm the one who knocks!",
-      "author_id": 1
-    },
-    "2": {
-      "id": 2,
-      "body": "I did it for me. I liked it. I was good at it. And, I was really... I was alive.",
-      "author_id": 1
-    }
-  },
+  "chirps": {},
   "users": {
     "1": {
       "id": 1,
       "email": "walt@breakingbad.com",
-      "password": "$2a$10$HO4.NA5gYOPLPW6tAE1PU.o/PTdK04/38eplj5iC8YYZam6s0RaZq"
+      "password": "$2a$10$Qj1bbhk15qdE8PR2y7qKEu098XrD0wcf8pwWwHOf3RW1zd7jrrp8W"
+    },
+    "2": {
+      "id": 2,
+      "email": "skyler@breakingbad.com",
+      "password": "$2a$10$Ftzd9jYhYdYiWOiVqbzzY.5HVmt4A7nNf28nB3uedzuKmWdRI8brC"
     }
   },
-  "next_id": 3,
-  "next_user_id": 2,
+  "next_id": 2,
+  "next_user_id": 3,
   "refresh_tokens": {
-    "0416569750840b18a1f584a0334d85108a8c172cbefd2eb1a6b2643396a4bc76": {
-      "token": "0416569750840b18a1f584a0334d85108a8c172cbefd2eb1a6b2643396a4bc76",
+    "257c4d9b9043119ce125d087510c46eed4bb8bbdbafb599a09f69f1207492486": {
+      "token": "257c4d9b9043119ce125d087510c46eed4bb8bbdbafb599a09f69f1207492486",
       "user_id": 1,
-      "expires_at": "2024-07-26T01:57:15.214199696+01:00"
+      "expires_at": "2024-07-26T02:09:12.241931895+01:00"
+    },
+    "93a4f56384c798cd4187cbf56e117aacc2e6ff0dbd250afb42f8e4a7517828db": {
+      "token": "93a4f56384c798cd4187cbf56e117aacc2e6ff0dbd250afb42f8e4a7517828db",
+      "user_id": 2,
+      "expires_at": "2024-07-26T02:09:12.349674781+01:00"
     }
   }
 }

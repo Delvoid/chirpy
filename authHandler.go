@@ -2,8 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"net/http"
+	"strconv"
 	"strings"
 	"time"
 
@@ -16,6 +18,34 @@ type loginRequest struct {
 	Email            string `json:"email"`
 	Password         string `json:"password"`
 	ExpiresInSeconds int    `json:"expires_in_seconds,omitempty"`
+}
+
+func validateToken(r *http.Request, jwtSecret string) (int, error) {
+	tokenString := r.Header.Get("Authorization")
+	if tokenString == "" {
+		return 0, errors.New("Missing Authorization header")
+	}
+
+	tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+	claims := &jwt.StandardClaims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		return []byte(jwtSecret), nil
+	})
+
+	if err != nil {
+		return 0, errors.New("Invalid token")
+	}
+
+	if !token.Valid {
+		return 0, errors.New("Invalid token")
+	}
+
+	userID, err := strconv.Atoi(claims.Subject)
+	if err != nil {
+		return 0, errors.New("Invalid user ID")
+	}
+
+	return userID, nil
 }
 
 func loginHandler(jwtSecret string) http.HandlerFunc {

@@ -6,10 +6,8 @@ import (
 	"log"
 	"net/http"
 	"strconv"
-	"strings"
 
 	"github.com/Delvoid/chirpy/database"
-	"github.com/dgrijalva/jwt-go"
 )
 
 type ErrorResponse struct {
@@ -27,29 +25,9 @@ type Chirp struct {
 
 func createChirpHandler(jwtSecret string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		tokenString := r.Header.Get("Authorization")
-		if tokenString == "" {
-			respondWithError(w, "No token provided", http.StatusUnauthorized)
-			return
-		}
-
-		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
-		claims := &jwt.StandardClaims{}
-		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-			return []byte(jwtSecret), nil
-		})
+		userID, err := validateToken(r, jwtSecret)
 		if err != nil {
-			respondWithError(w, "Invalid token", http.StatusUnauthorized)
-			return
-		}
-
-		if !token.Valid {
-			respondWithError(w, "Invalid token", http.StatusUnauthorized)
-			return
-		}
-		userId, err := strconv.Atoi(claims.Subject)
-		if err != nil {
-			respondWithError(w, "Invalid token", http.StatusUnauthorized)
+			respondWithError(w, err.Error(), http.StatusUnauthorized)
 			return
 		}
 
@@ -60,7 +38,7 @@ func createChirpHandler(jwtSecret string) http.HandlerFunc {
 			return
 		}
 
-		chirp, err := database.CreateChirp(resBody.Body, userId)
+		chirp, err := database.CreateChirp(resBody.Body, userID)
 		if err != nil {
 			respondWithError(w, err.Error(), http.StatusBadRequest)
 			return
@@ -98,6 +76,41 @@ func getChirpByIDHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, chirp, http.StatusOK)
+}
+
+func deleteChirpHandler(jwtSecret string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		userID, err := validateToken(r, jwtSecret)
+		if err != nil {
+			respondWithError(w, err.Error(), http.StatusUnauthorized)
+			return
+		}
+
+		chirpID, err := strconv.Atoi(r.PathValue("chirpID"))
+		if err != nil {
+			respondWithError(w, "Invalid chirp ID", http.StatusBadRequest)
+			return
+		}
+
+		chirp, err := database.GetChirpByID(chirpID)
+		if err != nil {
+			respondWithError(w, "Chirp not found", http.StatusNotFound)
+			return
+		}
+
+		if chirp.AuthorID != userID {
+			respondWithError(w, "Not authorized to delete this chirp", http.StatusForbidden)
+			return
+		}
+
+		err = database.DeleteChirp(chirpID)
+		if err != nil {
+			respondWithError(w, "Failed to delete chirp", http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
+	}
 }
 
 func respondWithError(w http.ResponseWriter, errorMessage string, statusCode int) {
