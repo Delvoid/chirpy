@@ -14,29 +14,36 @@ type PolkaWebhookEvent struct {
 	} `json:"data"`
 }
 
-func polkaWebhookHandler(w http.ResponseWriter, r *http.Request) {
+func polkaWebhookHandler(polkaApiKey string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
 
-	var req PolkaWebhookEvent
-	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
-		respondWithError(w, "Invalid request body", http.StatusBadRequest)
-		return
-	}
-
-	if req.Event != "user.upgraded" {
-		respondWithError(w, "Invalid event type", http.StatusNoContent)
-		return
-	}
-
-	err := database.UpgradeUserToChirpyRed(req.Data.UserID)
-	if err != nil {
-		if err == database.ErrUserNotFound {
-			respondWithError(w, "User not found", http.StatusNotFound)
-		} else {
-			respondWithError(w, "Failed to upgrade user", http.StatusInternalServerError)
+		authHeader := r.Header.Get("Authorization")
+		if authHeader != "ApiKey "+polkaApiKey {
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized)
+			return
 		}
-		return
+
+		var req PolkaWebhookEvent
+		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+			respondWithError(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		if req.Event != "user.upgraded" {
+			respondWithError(w, "Invalid event type", http.StatusNoContent)
+			return
+		}
+
+		err := database.UpgradeUserToChirpyRed(req.Data.UserID)
+		if err != nil {
+			if err == database.ErrUserNotFound {
+				respondWithError(w, "User not found", http.StatusNotFound)
+			} else {
+				respondWithError(w, "Failed to upgrade user", http.StatusInternalServerError)
+			}
+			return
+		}
+
+		w.WriteHeader(http.StatusNoContent)
 	}
-
-	w.WriteHeader(http.StatusNoContent)
-
 }

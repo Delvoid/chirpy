@@ -4,22 +4,17 @@
     "1": {
       "id": 1,
       "email": "walt@breakingbad.com",
-      "password": "$2a$10$mEx5xW9hhHcpEG7P0RUO..qc7/dWpd9lzOcgvzhiHXsptML6x5/8i",
+      "password": "$2a$10$sybUaHKUa.ehpoELfoe0D.OS8gMDF.W.kIOqAEnhXHm4lVVTB261y",
       "is_chirpy_red": true
     }
   },
   "next_id": 1,
   "next_user_id": 2,
   "refresh_tokens": {
-    "4ef23a9730be6bb619d93f3c7e9cdc3d1d4a26a1a21fddd69f7096b43f792b16": {
-      "token": "4ef23a9730be6bb619d93f3c7e9cdc3d1d4a26a1a21fddd69f7096b43f792b16",
+    "46bd0e2e21daa4655dd40ca25efa6dfabe4563c4b8aeeb93bb926cce77f0e93b": {
+      "token": "46bd0e2e21daa4655dd40ca25efa6dfabe4563c4b8aeeb93bb926cce77f0e93b",
       "user_id": 1,
-      "expires_at": "2024-07-26T11:58:17.030835419+01:00"
-    },
-    "c1cca652fd3eb4e534c8b3254868ae4233b3fe395107d9a98103896c74764868": {
-      "token": "c1cca652fd3eb4e534c8b3254868ae4233b3fe395107d9a98103896c74764868",
-      "user_id": 1,
-      "expires_at": "2024-07-26T11:58:17.090119234+01:00"
+      "expires_at": "2024-07-26T12:17:40.503076655+01:00"
     }
   }
 }

@@ -14,6 +14,7 @@ import (
 type apiConfig struct {
 	fileserverHits int
 	jwtSecret      string
+	polkaApiKey    string
 }
 
 func (cfg *apiConfig) middlewareMetricsInc(next http.Handler) http.Handler {
@@ -65,6 +66,11 @@ func main() {
 		log.Fatalf("JWT_SECRET environment variable is not set")
 	}
 
+	cfg.polkaApiKey = os.Getenv("POLKA_API_KEY")
+	if cfg.polkaApiKey == "" {
+		log.Fatalf("POLKA_API_KEY environment variable is not set")
+	}
+
 	if *debug {
 		log.Println("Debug mode enabled")
 		err := database.RemoveDatabase()
@@ -99,7 +105,7 @@ func main() {
 	mux.HandleFunc("POST /api/refresh", refreshHandler(cfg.jwtSecret))
 	mux.HandleFunc("POST /api/revoke", revokeHandler)
 
-	mux.HandleFunc("POST /api/polka/webhooks", polkaWebhookHandler)
+	mux.HandleFunc("POST /api/polka/webhooks", polkaWebhookHandler(cfg.polkaApiKey))
 
 	server := &http.Server{
 		Addr:    ":" + port,
