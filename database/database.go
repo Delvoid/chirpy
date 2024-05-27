@@ -79,6 +79,20 @@ func GetChirps() ([]Chirp, error) {
 	return chirps, nil
 }
 
+func GetChirpsByAuthorID(authorID int) ([]Chirp, error) {
+	dbMutex.RLock()
+	defer dbMutex.RUnlock()
+
+	chirps := make([]Chirp, 0)
+	for _, chirp := range db.Chirps {
+		if chirp.AuthorID == authorID {
+			chirps = append(chirps, chirp)
+		}
+	}
+
+	return chirps, nil
+}
+
 func GetChirpByID(id int) (Chirp, error) {
 	dbMutex.RLock()
 	defer dbMutex.RUnlock()

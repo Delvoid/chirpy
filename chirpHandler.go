@@ -50,7 +50,26 @@ func createChirpHandler(jwtSecret string) http.HandlerFunc {
 }
 
 func getChirpsHandler(w http.ResponseWriter, r *http.Request) {
-	chirps, err := database.GetChirps()
+	authorIdStr := r.URL.Query().Get("author_id")
+
+	var chirps []database.Chirp
+	var err error
+	if authorIdStr == "" {
+
+		chirps, err = database.GetChirps()
+	} else {
+
+		authorId, err := strconv.Atoi(authorIdStr)
+		if err != nil {
+			respondWithError(w, "Invalid author ID", http.StatusBadRequest)
+			return
+		}
+		chirps, err = database.GetChirpsByAuthorID(authorId)
+		if err != nil {
+			respondWithError(w, "Failed to retrieve chirps", http.StatusInternalServerError)
+			return
+		}
+	}
 	if err != nil {
 		respondWithError(w, "Failed to retrieve chirps", http.StatusInternalServerError)
 		return
