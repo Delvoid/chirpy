@@ -162,9 +162,10 @@ func CreateUser(email, password string) (User, error) {
 	}
 
 	user := User{
-		ID:       db.NextUserID,
-		Email:    email,
-		Password: string(hashedPassword),
+		ID:          db.NextUserID,
+		Email:       email,
+		Password:    string(hashedPassword),
+		IsChirpyRed: false,
 	}
 
 	db.Users[user.ID] = user
@@ -176,6 +177,26 @@ func CreateUser(email, password string) (User, error) {
 	}
 
 	return user, nil
+}
+
+func UpgradeUserToChirpyRed(userID int) error {
+	dbMutex.Lock()
+	defer dbMutex.Unlock()
+
+	user, ok := db.Users[userID]
+	if !ok {
+		return ErrUserNotFound
+	}
+
+	user.IsChirpyRed = true
+	db.Users[userID] = user
+
+	err := saveDatabase()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func GetUserByEmail(email string) (User, error) {

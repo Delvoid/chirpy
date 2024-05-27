@@ -99,6 +99,8 @@ func main() {
 	mux.HandleFunc("POST /api/refresh", refreshHandler(cfg.jwtSecret))
 	mux.HandleFunc("POST /api/revoke", revokeHandler)
 
+	mux.HandleFunc("POST /api/polka/webhooks", polkaWebhookHandler)
+
 	server := &http.Server{
 		Addr:    ":" + port,
 		Handler: mux,
