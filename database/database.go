@@ -91,7 +91,7 @@ func GetChirpByID(id int) (Chirp, error) {
 	return chirp, nil
 }
 
-func CreateChirp(body string) (Chirp, error) {
+func CreateChirp(body string, userId int) (Chirp, error) {
 	dbMutex.Lock()
 	defer dbMutex.Unlock()
 
@@ -101,8 +101,9 @@ func CreateChirp(body string) (Chirp, error) {
 	}
 
 	chirp := Chirp{
-		ID:   db.NextID,
-		Body: cleanedBody,
+		ID:       db.NextID,
+		Body:     cleanedBody,
+		AuthorID: userId,
 	}
 
 	db.Chirps[chirp.ID] = chirp

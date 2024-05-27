@@ -88,7 +88,7 @@ func main() {
 	mux.HandleFunc("GET /api/healthz", healthzHandlert)
 	mux.HandleFunc("GET /api/reset", cfg.resetHandler)
 
-	mux.HandleFunc("POST /api/chirps", createChirpHandler)
+	mux.HandleFunc("POST /api/chirps", createChirpHandler(cfg.jwtSecret))
 	mux.HandleFunc("GET /api/chirps", getChirpsHandler)
 	mux.HandleFunc("GET /api/chirps/{chirpID}", getChirpByIDHandler)
 

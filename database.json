@@ -1,13 +1,30 @@
 {
-  "chirps": {},
+  "chirps": {
+    "1": {
+      "id": 1,
+      "body": "I'm the one who knocks!",
+      "author_id": 1
+    },
+    "2": {
+      "id": 2,
+      "body": "I did it for me. I liked it. I was good at it. And, I was really... I was alive.",
+      "author_id": 1
+    }
+  },
   "users": {
     "1": {
       "id": 1,
-      "email": "chuck@bettercall.com",
-      "password": "$2a$10$fm4CtBkW9UDSB1svJyZ3huk7TRy.Vw6Lb7RRTZ.XL3DrNFzSDWU16"
+      "email": "walt@breakingbad.com",
+      "password": "$2a$10$HO4.NA5gYOPLPW6tAE1PU.o/PTdK04/38eplj5iC8YYZam6s0RaZq"
     }
   },
-  "next_id": 1,
+  "next_id": 3,
   "next_user_id": 2,
-  "refresh_tokens": {}
+  "refresh_tokens": {
+    "0416569750840b18a1f584a0334d85108a8c172cbefd2eb1a6b2643396a4bc76": {
+      "token": "0416569750840b18a1f584a0334d85108a8c172cbefd2eb1a6b2643396a4bc76",
+      "user_id": 1,
+      "expires_at": "2024-07-26T01:57:15.214199696+01:00"
+    }
+  }
 }

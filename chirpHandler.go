@@ -6,8 +6,10 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 
 	"github.com/Delvoid/chirpy/database"
+	"github.com/dgrijalva/jwt-go"
 )
 
 type ErrorResponse struct {
@@ -23,22 +25,50 @@ type Chirp struct {
 	Body string `json:"body"`
 }
 
-func createChirpHandler(w http.ResponseWriter, r *http.Request) {
-	resBody := chirpRequest{}
+func createChirpHandler(jwtSecret string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		tokenString := r.Header.Get("Authorization")
+		if tokenString == "" {
+			respondWithError(w, "No token provided", http.StatusUnauthorized)
+			return
+		}
 
-	if err := json.NewDecoder(r.Body).Decode(&resBody); err != nil {
-		respondWithError(w, "Invalid request body", http.StatusBadRequest)
-		return
+		tokenString = strings.TrimPrefix(tokenString, "Bearer ")
+		claims := &jwt.StandardClaims{}
+		token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+			return []byte(jwtSecret), nil
+		})
+		if err != nil {
+			respondWithError(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		if !token.Valid {
+			respondWithError(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+		userId, err := strconv.Atoi(claims.Subject)
+		if err != nil {
+			respondWithError(w, "Invalid token", http.StatusUnauthorized)
+			return
+		}
+
+		resBody := chirpRequest{}
+
+		if err := json.NewDecoder(r.Body).Decode(&resBody); err != nil {
+			respondWithError(w, "Invalid request body", http.StatusBadRequest)
+			return
+		}
+
+		chirp, err := database.CreateChirp(resBody.Body, userId)
+		if err != nil {
+			respondWithError(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		respondWithJSON(w, chirp, http.StatusCreated)
+
 	}
-
-	chirp, err := database.CreateChirp(resBody.Body)
-	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	respondWithJSON(w, chirp, http.StatusCreated)
-
 }
 
 func getChirpsHandler(w http.ResponseWriter, r *http.Request) {
