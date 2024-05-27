@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"sort"
 	"strconv"
 
 	"github.com/Delvoid/chirpy/database"
@@ -51,11 +52,12 @@ func createChirpHandler(jwtSecret string) http.HandlerFunc {
 
 func getChirpsHandler(w http.ResponseWriter, r *http.Request) {
 	authorIdStr := r.URL.Query().Get("author_id")
+	sortOrder := r.URL.Query().Get("sort")
 
 	var chirps []database.Chirp
 	var err error
-	if authorIdStr == "" {
 
+	if authorIdStr == "" {
 		chirps, err = database.GetChirps()
 	} else {
 
@@ -73,6 +75,12 @@ func getChirpsHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		respondWithError(w, "Failed to retrieve chirps", http.StatusInternalServerError)
 		return
+	}
+
+	if sortOrder == "desc" {
+		chirps = sortChirps(chirps, "desc")
+	} else {
+		chirps = sortChirps(chirps, "asc")
 	}
 
 	respondWithJSON(w, chirps, http.StatusOK)
@@ -148,4 +156,17 @@ func respondWithJSON(w http.ResponseWriter, payload interface{}, statusCode int)
 	}
 	w.WriteHeader(statusCode)
 	w.Write(dat)
+}
+
+func sortChirps(chirps []database.Chirp, sortOrder string) []database.Chirp {
+	if sortOrder == "desc" {
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].ID > chirps[j].ID
+		})
+	} else {
+		sort.Slice(chirps, func(i, j int) bool {
+			return chirps[i].ID < chirps[j].ID
+		})
+	}
+	return chirps
 }

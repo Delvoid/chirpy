@@ -12,36 +12,30 @@
     },
     "3": {
       "id": 3,
-      "body": "Mr President....",
-      "author_id": 2
+      "body": "Cmon Pinkman",
+      "author_id": 1
+    },
+    "4": {
+      "id": 4,
+      "body": "Darn that fly, I just wanna cook",
+      "author_id": 1
     }
   },
   "users": {
     "1": {
       "id": 1,
       "email": "walt@breakingbad.com",
-      "password": "$2a$10$RBo3RGOfklkoZ1FNBpEh1.p0Y6tKn2.xMdydDpdKyUbsfkBs5MaqO",
-      "is_chirpy_red": false
-    },
-    "2": {
-      "id": 2,
-      "email": "skyler@breakingbad.com",
-      "password": "$2a$10$So2soZntXiHXUTUM1eR4fulVNrs1jMPS.cuU2ijDHojMWH70S0V5S",
+      "password": "$2a$10$8P08eKhkm9HCwMIcibost.oLO12YDjyAFGlAm6sjXj.EOFopooKKS",
       "is_chirpy_red": false
     }
   },
-  "next_id": 4,
-  "next_user_id": 3,
+  "next_id": 5,
+  "next_user_id": 2,
   "refresh_tokens": {
-    "cb9f2aaf5b9f4aefb06b354a58be2dfe938e756677e39a2627b3c5937d1a60ba": {
-      "token": "cb9f2aaf5b9f4aefb06b354a58be2dfe938e756677e39a2627b3c5937d1a60ba",
-      "user_id": 2,
-      "expires_at": "2024-07-26T12:33:46.495897246+01:00"
-    },
-    "dd23d763ad9b8c0c422eb3c534d2c23695d33d6e5950b7d00c34b1a37ce17926": {
-      "token": "dd23d763ad9b8c0c422eb3c534d2c23695d33d6e5950b7d00c34b1a37ce17926",
+    "3836367297a81d8f8bb926b275741bcac4763e73f0f22eb24330b548677776c7": {
+      "token": "3836367297a81d8f8bb926b275741bcac4763e73f0f22eb24330b548677776c7",
       "user_id": 1,
-      "expires_at": "2024-07-26T12:33:46.388573542+01:00"
+      "expires_at": "2024-07-26T12:44:39.948905582+01:00"
     }
   }
 }
